@@ -2,6 +2,8 @@
 <html>
   <head>
     <meta charset="utf-8">
+    <link href="dist/img/icono.ico" rel="shortcut icon"  type="image/ico">
+	<link href="dist/img/icono.png" rel="shortcut icon"  type="image/png">
     <title>E-Computer</title>
     <meta name="viewport" content="initial-scale=1, maximum-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -9,40 +11,77 @@
     <link href="dist/ratchet/css/ratchet.css" rel="stylesheet">
     <link href="dist/font-awesome/css/font-awesome.min.css" rel="stylesheet">
     <link href="dist/css/styles-perform.css" rel="stylesheet">
+    <link href="dist/toast/toastr.min.css" rel="stylesheet">
     <script src="dist/ratchet/js/ratchet.js"></script>
+    <script src="dist/jquery/jquery.min.js"></script>
+    <script src="dist/jquery/jquery.UI.js"></script>
+    <script src="dist/toast/toastr.min.js"></script>
   </head>
   <body>
     <!-- BARRA SUPERIOR -->
     <header class="bar bar-nav perform-back-black">
-        <a href="#carritocompras" class="icon pull-right perform-text-white"><span class="fa fa-shopping-cart"></span><span class="badge badge-negative">0</span></a>
-        <a href="#carritohistorico" class="icon pull-left perform-text-white"><span class="fa fa-list-ul"></span></a>
+        <a href="#" onClick="ver_carrito();" class="icon pull-right perform-text-white"><span class="fa fa-shopping-cart"></span> <span class="badge badge-negative" id="contadorproductos">0</span></a>
+        <a href="#selcategoria" class="icon pull-left perform-text-white"><span class="fa fa-list-ul"></span></a>
         <h1 class="title perform-text-white">E-Computer</h1>
     </header>
-    <!-- CARRITO DE COMPRAS -->
+    <!-- CARRITO DE COMPRAS DINAMICO -->
     <div id="carritocompras" class="modal">
         <header class="bar bar-nav perform-back-black">
             <a class="icon icon-close pull-right perform-text-white" href="#carritocompras"></a>
             <h1 class="title perform-text-white">Carrito de compras</h1>
         </header>
-        <div class="content">
-            <p class="content-padded">The contents of my modal go here. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut.</p>
+        <div class="content" id="cargaproductosparcial">            
         </div>
     </div>
-    <!-- CARRITO HISTORICO -->
-    <div id="carritohistorico" class="modal">
+    <!-- SELECCION DE CATEGORIAS -->
+    <div id="selcategoria" class="modal">
         <header class="bar bar-nav perform-back-black">
-            <a class="icon icon-close pull-right perform-text-white" href="#carritohistorico"></a>
-            <h1 class="title perform-text-white">Carrito hist&oacute;rico</h1>
+            <a class="icon icon-close pull-right perform-text-white" href="#selcategoria"></a>
+            <h1 class="title perform-text-white">Seleccione categor&iacute;as</h1>
         </header>
-        <div class="content">
-            <p class="content-padded">The contents of my modal go here. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut.</p>
+        <div class="content">            
+            <div class="card perform-noradius">
+            <ul class="table-view">
+                <li class="table-view-cell media" onClick="obtener_productos('2');">
+                    <a class="navigate-right">
+                    <span class="media-object pull-left icon icon-pages"></span>
+                    <div class="media-body">
+                        Computadoras
+                    </div>
+                    </a>
+                </li>
+                <li class="table-view-cell media" onClick="obtener_productos('1');">
+                    <a class="navigate-right">
+                    <span class="media-object pull-left icon icon-pages"></span>
+                    <div class="media-body">
+                        Accesorios
+                    </div>
+                    </a>
+                </li>
+                <li class="table-view-cell media" onClick="obtener_productos('3');">
+                    <a class="navigate-right">
+                    <span class="media-object pull-left icon icon-pages"></span>
+                    <div class="media-body">
+                        Memorias
+                    </div>
+                    </a>
+                </li>
+                <li class="table-view-cell media" onClick="obtener_productos('4');">
+                    <a class="navigate-right">
+                    <span class="media-object pull-left icon icon-pages"></span>
+                    <div class="media-body">
+                        Programas
+                    </div>
+                    </a>
+                </li>
+            </ul>
+            </div>
+            <br><center><img src="dist/img/icono.png" width="35" height="35"><h5>E-Computer</h5></center>
         </div>
     </div>
     <!-- VISTA DINAMICA DE PRODUCTOS -->
-    <div class="content perform-back-gray">
-      <div class="card perform-noradius">
-        <center><img src="http://s7d1.scene7.com/is/image/officedepot/463690_p_center_15_r052nr_center?$OD-Dynamic$&wid=250&hei=250" width="150px" height="150px" ></center>
-      </div>
+    <div class="content perform-back-gray" id="areaproductos">
+                
     </div>
     <!-- BARRA INFERIOR CATEGORIAS-->
     <nav class="bar bar-standard bar-footer perform-back-black">
@@ -50,3 +89,106 @@
     </nav>
   </body>
 </html>
+<!-- APP FUNCTION JS -->
+<script>
+    var idcliente=0;
+    var carrito=[];
+	var cantidad;
+    //CARGAR AL INICIAR APLICACION
+    $(document).ready(function(){
+        obtener_productos('2');
+    });
+    //AGREGAR PARCIALMENTE AL CARRITO
+    function agregar_carrito(cliente,idproducto,nombre,precio,imagen)
+    {				
+        var nuevo;
+        nuevo={"idcliente":cliente,"idproductos":idproducto,"nombre":nombre,"precio":precio,"url":imagen};
+        carrito.push(nuevo);
+        cantidad=carrito.length;
+        $("#contadorproductos").html(cantidad).fadeIn();        
+        toastr.options = {
+            "positionClass": "toast-bottom-center"
+        }
+        toastr.success("<h5>Agregado al carrito: $"+precio+"</h5>");
+    }
+    //ELIMINAR PRODUCTO DE CARRITO
+    function eliminar_carrito()
+    {
+        cantidad=carrito.length;
+        $("#contadorproductos").html(cantidad).fadeIn();       
+    }
+    //VER PRODUCTOS ALMACENADOS EN CARRITO
+    function ver_carrito()
+    {
+        $("#carritocompras").addClass("active");
+        if(carrito.length == 0)
+        {
+            $("#cargaproductosparcial").html("");            
+            $("#cargaproductosparcial").append("<br><br><center><img src='dist/img/carrito.png' width='40px'  height='40px'><p>No hay productos en el carrito. . .</p></center>");
+        }
+        else{
+            var subtotal=0;
+            $("#cargaproductosparcial").html("");            
+            var html="<ul class='table-view'>";
+            $.each(carrito ,function(indice,valor){
+                subtotal=subtotal+parseFloat(valor.precio);
+                html=html+"<li class='table-view-cell media'><img src='"+valor.url+"' width='40' height='40' class='media-object pull-left'><div class='media-body'>"+valor.nombre+"<br>$"+valor.precio+"<a class='btn btn-negative pull-right' id='"+indice+"'><span class='icon icon-trash'></span></a></div></li><script>$('#"+indice+"').click(function(){ carrito.splice("+indice+",1); eliminar_carrito(); ver_carrito();});\<\/\script\>";					
+            });
+            html=html+"</ul><center><p>Subtotal: $"+subtotal+"</p></center>";
+            $("#cargaproductosparcial").append(html);           
+        }
+    }
+    //OBTENER PRODUCTOS POR WS
+    function obtener_productos(categ)
+    {
+        $("#selcategoria").removeClass("active");
+        $("#areaproductos").html('<br><br><center><img src="dist/img/loading.GIF" width="50px"  height="50px"></center>');      
+        //OBTENIENDO INFORMACION DE WS
+        $.get("http://pymesv.com/cliente02w/API/categorias/", { categoria: categ})
+        .done(function(jsonws){
+            switch(categ)
+            {
+                case "1":
+                    $("#areaproductos").html("<br><center><p>Actual: Categor&iacute;a Accesorios</p></center>");	
+                break;
+                case "2":
+                    $("#areaproductos").html("<br><center><p>Actual: Categor&iacute;a Computadoras</p></center>");	
+                break;
+                case "3":
+                    $("#areaproductos").html("<br><center><p>Actual: Categor&iacute;a Memorias</p></center>");	
+                break;
+                case "4":
+                    $("#areaproductos").html("<br><center><p>Actual: Categor&iacute;a Programas</p></center>");	
+                break;
+                default:
+                    $("#areaproductos").html("");	
+                break;
+            }            									
+            $.each(jsonws ,function(indice,valor){
+                if(indice=="error" && valor=="0")
+                {                   
+                    toastr.options = {
+                        "positionClass": "toast-bottom-center"
+                    }
+                    toastr.error("<h5>:( Error desconocido. . .</h5>");
+                }
+                else if(indice=="error" && valor=="1")
+                {                    
+                    toastr.options = {
+                        "positionClass": "toast-bottom-center"
+                    }
+                    toastr.error("<h5>:( No existen productos. . .</h5>");
+                    var html="<br><br><br><center><img src='dist/img/notfound.png' width='60' height='60'><p>No existen productos registrados. . .</p></center>";
+                    $("#areaproductos").append(html);
+                }
+                else
+                {                	
+                var html ="<div class='card perform-noradius'><center><br><img src='"+valor.url+"' width='100px' height='100px'></center><h5 class='perform-text-margin'>"+valor.nombre+"</h5><p class='perform-text-margin'>Precio: $"+valor.precio+"</p><center><a class='btn btn-primary perform-noradius' id='"+valor.idproductos+"'><i class='fa fa-shopping-cart'></i> Agregar al carrito</a></center><br></div>";
+                    html=html+"<script>$('#"+valor.idproductos+"').click(function(){ agregar_carrito(idcliente,'"+valor.idproductos+"','"+valor.nombre+"','"+valor.precio+"','"+valor.url+"');});\<\/\script\>";
+                    $("#areaproductos").append(html);                    
+                }
+            })
+            $("#areaproductos").append("<br><br>");
+        });
+    }
+</script>
